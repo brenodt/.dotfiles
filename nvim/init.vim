@@ -24,7 +24,10 @@ set scrolloff=8
 set signcolumn=yes
 set colorcolumn=80
 
-call plug#begin('~/.vim/plugged')
+"" Instantiating the LSP Server setup AFTER setting the colorscheme
+"" so that error messages are configured
+
+call plug#begin(has('nvim') ? stdpath('data') . '/plugged' : '~/.vim/plugged')
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
@@ -32,24 +35,7 @@ Plug 'gruvbox-community/gruvbox'
 
 Plug 'tpope/vim-fugitive'
 Plug 'vim-airline/vim-airline'
-call plug#end()
 
-
-" Changing error style from LSP
-let g:gruvbox_contrast_dark = 'hard'
-if exists('+termguicolors')
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum;"
-    let &t_8b = "\<Esc>[38;2;%lu;%lu;%lum;"
-endif
-let g:gruvbox_invert_selection='0'
-
-colorscheme gruvbox
-highlight Normal guibg=none
-
-"" Instantiating the LSP Server setup AFTER setting the colorscheme
-"" so that error messages are configured
-
-call plug#begin('~/.vim/plugged')
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/nvim-cmp'
@@ -70,6 +56,17 @@ Plug 'saadparwaiz1/cmp_luasnip'
 " Plug 'dcampos/nvim-snippy'
 " Plug 'dcampos/cmp-snippy'
 call plug#end()
+
+" Changing error style from LSP
+let g:gruvbox_contrast_dark = 'hard'
+if exists('+termguicolors')
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum;"
+    let &t_8b = "\<Esc>[38;2;%lu;%lu;%lum;"
+endif
+let g:gruvbox_invert_selection='0'
+
+colorscheme gruvbox
+highlight Normal guibg=none
 
 set completeopt=menu,menuone,noselect
 
