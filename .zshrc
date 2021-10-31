@@ -1,3 +1,5 @@
+DEFAULT_USER=brenodt
+
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/brenodt/.oh-my-zsh"
 
@@ -67,11 +69,12 @@ ZSH_THEME="agnoster"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git tmux flutter zsh-interactive-cd )
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+ZSH_TMUX_AUTOSTART=true
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -118,3 +121,5 @@ export PATH="$PATH":"/Applications/Postgres.app/Contents/Versions/latest/bin"
 export ANDROID_SDK_ROOT="/Users/brenodt/Library/Android/sdk"
 export ANDROID_NDK_HOME="/Users/brenodt/Library/Android/sdk/ndk/24.0.7856742"
 
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

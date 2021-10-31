@@ -7,6 +7,7 @@ xcode-select --install
 # Create symlinks
 ln -s ~/.dotfiles/.zshrc ~/.zshrc
 ln -s ~/.dotfiles/.gitconfig ~/.gitconfig
+ln -s ~/.dotfiles/.fzf.zsh ~/.fzf.szh
 
 mkdir ~/.config/nvim && ln -s ~/.dotfiles/nvim/init.vim ~/.config/nvim/init.vim
 

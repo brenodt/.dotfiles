@@ -31,6 +31,8 @@ call plug#begin(has('nvim') ? stdpath('data') . '/plugged' : '~/.vim/plugged')
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+
 Plug 'gruvbox-community/gruvbox'
 
 Plug 'tpope/vim-fugitive'
