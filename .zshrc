@@ -1,6 +1,3 @@
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
-
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/brenodt/.oh-my-zsh"
 
@@ -10,7 +7,6 @@ export ZSH="/Users/brenodt/.oh-my-zsh"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="agnoster"
 
-DEFAULT_USER="brenodt prompt_context(){}"
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
@@ -108,3 +104,17 @@ if type brew &>/dev/null; then
     autoload -Uz compinit
     compinit
 fi
+
+# --------------
+# Exported Paths
+# --------------
+eval $(/opt/homebrew/bin/brew shellenv)
+
+export PATH=$PATH:$HOME/bin
+export PATH="$PATH:/Users/brenodt/dev/flutter/bin"
+export PATH="$PATH":"$HOME/dev/flutter/.pub-cache/bin"
+export PATH="$PATH":"/Applications/Postgres.app/Contents/Versions/latest/bin"
+
+export ANDROID_SDK_ROOT="/Users/brenodt/Library/Android/sdk"
+export ANDROID_NDK_HOME="/Users/brenodt/Library/Android/sdk/ndk/24.0.7856742"
+
