@@ -133,6 +133,17 @@ nnoremap <leader>ps :lua require('telescope.builtin').grep_string({ search = vim
 nmap <leader>gj :diffget //3<CR>
 nmap <leader>gf :diffget //2<CR>
 nmap <leader>gs :G<CR>
+
+nnoremap <leader>vd :lua vim.lsp.buf.definition()<CR>
+nnoremap <leader>vi :lua vim.lsp.buf.implementation()<CR>
+nnoremap <leader>vsh :lua vim.lsp.buf.signature_help()<CR>
+nnoremap <leader>vrr :lua vim.lsp.buf.references()<CR>
+nnoremap <leader>vrn :lua vim.lsp.buf.rename()<CR>
+nnoremap <leader>vh :lua vim.lsp.buf.hover()<CR>
+nnoremap <leader>vca :lua vim.lsp.buf.code_action()<CR>
+nnoremap <leader>vsd :lua vim.lsp.diagnostic.show_line_diagnostics()<CR>
+nnoremap <leader>vn :lua vim.lsp.diagnostic.goto_next()<CR>
+
 "**************************************************
 " AUTOCOMMANDS
 "**************************************************
