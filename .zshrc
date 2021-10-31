@@ -10,6 +10,7 @@ export ZSH="/Users/brenodt/.oh-my-zsh"
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ZSH_THEME="agnoster"
 
+DEFAULT_USER="brenodt prompt_context(){}"
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
@@ -100,10 +101,10 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-# Configure zsh-completions 
-if type brew &>/dev/null; then 
-    FPATH=$(brew --prefix)/share/zsh-completions:$FPATH 
- 
-    autoload -Uz compinit 
-    compinit 
+# Configure zsh-completions
+if type brew &>/dev/null; then
+    FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+
+    autoload -Uz compinit
+    compinit
 fi
