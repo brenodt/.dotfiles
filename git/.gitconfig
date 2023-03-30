@@ -3,7 +3,17 @@
 	email = 54450520+brenodt@users.noreply.github.com
 [core]
 	autocrlf = input
+	excludesfile = /Users/brenodt/.dotfiles/.gitignore
 [init]
 	defaultBranch = main
 [alias]
 	squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
+[push]
+	default = simple
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[safe]
+	directory = /root/development/flutter
