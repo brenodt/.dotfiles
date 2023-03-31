@@ -1,0 +1,33 @@
+---
+brew_packages:
+  - bash
+  - binutils
+  - circleci
+  - openssl@1.1
+  - ruby
+  - cocoapods
+  - coreutils
+  - doctl
+  - python@3.11
+  - exa
+  - fastlane
+  - fd
+  - fzf
+  - gawk
+  - gh
+  - git
+  - gradle
+  - gum
+  - luv
+  - ncurses
+  - neovim
+  - node
+  - protobuf
+  - ruby@2.7
+  - starship
+  - tmux
+  - tree
+  - zsh
+  - zsh-completions
+  - bufbuild/buf/buf
+  - mongodb/brew/mongodb-database-tools
