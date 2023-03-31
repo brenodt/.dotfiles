@@ -1,0 +1,30 @@
+#!/bin/bash
+set -eo pipefail
+
+# brewdeps
+# generate brew dependency files so that ansible can install them the next time you need it!
+# By default, will use the `brew bundle` command to retrieve the taps, casks and packages that are currently installed in the system,
+# and store those dependencies as requirements in the .ansible folder.
+
+if ! command -v brew &>/dev/null; then
+	echo "brew command is required"
+	exit 1
+fi
+
+{
+	echo "---"
+	echo "brew_taps:"
+	cat ../homebrew/Brewfile | grep ^tap | cut -d " " -f2 | tr -d '"' | sed -e 's/^/  - /'
+} >.ansible/brew/taps.yml
+
+{
+	echo "---"
+	echo "brew_casks:"
+	cat ../homebrew/Brewfile | grep ^cask | cut -d " " -f2 | tr -d '"' | sed -e 's/^/  - /'
+} >.ansible/brew/casks.yml
+
+{
+	echo "---"
+	echo "brew_packages:"
+	cat ../homebrew/Brewfile | grep ^brew | cut -d " " -f2 | tr -d '"' | sed -e 's/^/  - /'
+} >.ansible/brew/packages.yml
