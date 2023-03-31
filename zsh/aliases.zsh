@@ -18,9 +18,11 @@ alias gc='git commit'
 alias gco='git checkout'
 alias ga='git add'
 alias grp='git remote prune origin'
-alias gff='grp && g pull --ff-only'
+alias gff='grp && git pull --ff-only'
 alias gmc='git merge --continue'
 alias grc='git rebase --continue'
+alias gp='git push'
+alias gpsu='git push --set-upstream origin $(git branch --show-current)'
 
 # FUNCTIONS -----------------------------------------------------------
 function take {
