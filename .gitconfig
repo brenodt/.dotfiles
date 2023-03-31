@@ -1,9 +1,0 @@
-[user]
-	name = brenodt
-	email = 54450520+brenodt@users.noreply.github.com
-[core]
-	autocrlf = input
-[init]
-	defaultBranch = main
-[alias]
-	squash = "!f(){ git reset --soft HEAD~${1} && git commit --edit -m\"$(git log --format=%B --reverse HEAD..HEAD@{1})\"; };f"
