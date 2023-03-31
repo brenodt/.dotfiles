@@ -1,5 +1,7 @@
 ---
 brew_casks:
   - alacritty
+  - flutter
   - font-jetbrains-mono-nerd-font
   - rectangle
+  - vagrant

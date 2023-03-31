@@ -23,6 +23,8 @@ brew_packages:
   - neovim
   - node
   - protobuf
+  - python@3.10
+  - python-tk@3.10
   - ruby@2.7
   - starship
   - tmux

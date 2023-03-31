@@ -7,30 +7,45 @@
     - brew/packages.yml
 
   tasks:  
-    - name: Check for installed taps
-      shell: brew bundle list --tap | grep {{ item }}
-      register: installed_taps
-      ignore_errors: true
-      loop: "{{ brew_taps }}"
-      
+    - block:
+      - name: "Install required software"
+        apt:
+          name: "{{ packages }}"
+          state: present
+        vars:
+          packages:
+          - git
+          - neovim
+          - python3-pip
 
-    - name: Tap Brew taps
-      shell: brew tap "{{ item }}"
-      when: item not in installed_taps.results|map(attribute='stdout')
-      loop: "{{ brew_taps }}"
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-    - name: Check for installed apps (casks)
-      shell: brew bundle list --cask | grep {{ item }}
-      register: installed_applications
-      ignore_errors: true
-      loop: "{{ brew_casks }}"
+    - block:
+      - name: Check for installed taps
+        shell: brew bundle list --tap | grep {{ item }}
+        register: installed_taps
+        ignore_errors: true
+        loop: "{{ brew_taps }}"
 
-    - name: Install apps with brew-cask
-      shell: brew install --cask {{ item }}
-      when: item not in installed_applications.results|map(attribute='stdout')
-      loop: "{{ brew_casks }}"
+      - name: Tap Brew taps
+        shell: brew tap "{{ item }}"
+        when: item not in installed_taps.results|map(attribute='stdout')
+        loop: "{{ brew_taps }}"
 
-    - name: Install packages with homebrew
-      homebrew: name={{ item }} state=present
-      loop: "{{ brew_packages }}"
+      - name: Check for installed apps (casks)
+        shell: brew bundle list --cask | grep {{ item }}
+        register: installed_applications
+        ignore_errors: true
+        loop: "{{ brew_casks }}"
+
+      - name: Install apps with brew-cask
+        shell: brew install --cask {{ item }}
+        when: item not in installed_applications.results|map(attribute='stdout')
+        loop: "{{ brew_casks }}"
+
+      - name: Install packages with homebrew
+        homebrew: name={{ item }} state=present
+        loop: "{{ brew_packages }}"
+
+      when: ansible_distribution == 'MacOSX'
 
