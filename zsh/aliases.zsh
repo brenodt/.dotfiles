@@ -9,6 +9,8 @@ alias l='exa -lah'
 alias ls=exa
 alias sl=exa
 
+alias sa='alias | fzf'
+
 # GIT ALIASES ---------------------------------------------------------
 alias gc='git commit'
 alias gco='git checkout'
