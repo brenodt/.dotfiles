@@ -14,7 +14,7 @@ alias sa='alias | fzf'
 alias brew='brewrapper'
 
 # GIT ALIASES ---------------------------------------------------------
-alias gc='git commit'
+alias gc='git commit --verbose'
 alias gco='git checkout'
 alias ga='git add'
 alias grp='git remote prune origin'
