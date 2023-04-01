@@ -33,6 +33,11 @@ export PATH="$PATH:/usr/local/sbin:$DOTFILES/bin:$HOME/.local/bin"
 
 eval "$(starship init zsh)"
 
+# Key-bindings ----------------------------------------------------------------
+# https://github.com/alacritty/alacritty/issues/1408
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
+
 # VIM MODE (http://dougblack.io/words/zsh-vi-mode.html) -----------------------
 # bindkey -v
 bindkey '^?' backward-delete-char
