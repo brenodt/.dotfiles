@@ -7,3 +7,4 @@ brew_taps:
   - homebrew/cask-versions
   - homebrew/core
   - mongodb/brew
+  - wix/brew

@@ -29,7 +29,7 @@ echo ""
 echo "$branches" | tr " " "\n" | while read branch; do
 	case $command in
 	delete)
-		git branch -d "$branch"
+		git branch -D "$branch"
 		;;
 	update)
 		git checkout "$branch"

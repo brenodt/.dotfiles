@@ -16,20 +16,26 @@ brew_packages:
   - gawk
   - gh
   - git
-  - gradle
   - gum
+  - helm
+  - kubectx
   - luv
   - ncurses
   - neovim
   - node
+  - pnpm
   - protobuf
   - python@3.10
   - python-tk@3.10
+  - python-tk@3.11
   - ruby@2.7
   - starship
   - tmux
   - tree
+  - watchman
+  - yarn
   - zsh
   - zsh-completions
   - bufbuild/buf/buf
   - mongodb/brew/mongodb-database-tools
+  - wix/brew/applesimutils

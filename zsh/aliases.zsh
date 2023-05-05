@@ -1,4 +1,6 @@
 # ALIASES -------------------------------------------------------------
+alias dots='cd ~/.dotfiles/'
+
 alias vi='nvim'
 alias vim='nvim'
 
@@ -9,20 +11,28 @@ alias l='exa -lah'
 alias ls=exa
 alias sl=exa
 
+alias javahome='/usr/libexec/java_home'
+
 alias sa='alias | fzf'
 
 alias brew='brewrapper'
+
+# K8S ALIASES ---------------------------------------------------------
+alias kcl='kubectl'
+alias kcx='kubectx'
 
 # GIT ALIASES ---------------------------------------------------------
 alias gc='git commit --verbose'
 alias gco='git checkout'
 alias ga='git add'
+alias gst='git rev-parse --git-dir > /dev/null 2>&1 && git status || ls'
 alias grp='git remote prune origin'
 alias gff='grp && git pull --ff-only'
 alias gmc='git merge --continue'
 alias grc='git rebase --continue'
 alias gp='git push'
 alias gpsu='git push --set-upstream origin $(git branch --show-current)'
+alias gundo='git reset --soft HEAD~1'
 
 # FUNCTIONS -----------------------------------------------------------
 function take {
@@ -56,4 +66,11 @@ function brewrapper {
   echo ""
   echo "Done!"
   echo "Don't forget to commit and push .dotfiles changes"
+}
+
+function psaux {
+  local arg=$1
+
+  ps aux | head -n1
+  ps aux | grep "$arg" | grep -v grep
 }
