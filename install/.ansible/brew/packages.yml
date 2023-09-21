@@ -2,6 +2,9 @@
 brew_packages:
   - bash
   - binutils
+  - boost
+  - openjdk
+  - bundletool
   - circleci
   - openssl@1.1
   - ruby
@@ -9,8 +12,15 @@ brew_packages:
   - coreutils
   - doctl
   - python@3.11
+  - docutils
+  - folly
+  - edencommon
   - exa
   - fastlane
+  - fizz
+  - wangle
+  - fbthrift
+  - fb303
   - fd
   - fzf
   - gawk
@@ -23,16 +33,25 @@ brew_packages:
   - ncurses
   - neovim
   - node
+  - openjdk@17
   - pnpm
   - protobuf
   - python@3.10
+  - tcl-tk
   - python-tk@3.10
   - python-tk@3.11
+  - rclone
+  - redis
   - ruby@2.7
   - starship
+  - stern
+  - tldr
   - tmux
   - tree
+  - watch
   - watchman
+  - wget
+  - wxwidgets
   - yarn
   - zsh
   - zsh-completions

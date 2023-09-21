@@ -2,7 +2,6 @@
 brew_casks:
   - alacritty
   - fantastical
-  - flutter
   - font-jetbrains-mono-nerd-font
-  - obsidian
+  - mongodb-compass
   - rectangle

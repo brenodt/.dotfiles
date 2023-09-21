@@ -3,3 +3,5 @@
 	email = 54450520+brenodt@users.noreply.github.com
 [core]
 	autocrlf = input
+[credential]
+	helper = cache

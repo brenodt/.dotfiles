@@ -54,3 +54,11 @@ bindkey '^?' backward-delete-char
 # END VIM MODE ----------------------------------------------------------------
 
 #eval "$(lua ~/bin/z.lua --init zsh)"
+
+# pnpm
+export PNPM_HOME="/Users/brenodt/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
