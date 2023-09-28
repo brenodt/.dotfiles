@@ -120,10 +120,12 @@ install_dotfiles() {
 			local src dst dir
 			src=$(eval echo "$line" | cut -d '=' -f 1)
 			dst=$(eval echo "$line" | cut -d '=' -f 2)
-			dir=$(dirname $dst)
+			if dst != ""; then
+				dir=$(dirname $dst)
 
-			mkdir -p "$dir"
-			link_file "$src" "$dst"
+				mkdir -p "$dir"
+				link_file "$src" "$dst"
+			fi
 		done
 	done
 }
