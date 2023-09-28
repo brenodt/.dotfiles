@@ -3,9 +3,9 @@
 #### Install
 
 ```sh
-git clone <this-repo>
-cd <this-repo>
-./scripts/bootstrap.sh
+git clone https://github.com/brenodt/dotfiles.git
+cd dotfiles
+./install/bootstrap.sh
 ```
 
 ### Local ZSH Config
