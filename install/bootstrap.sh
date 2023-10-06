@@ -120,7 +120,9 @@ install_dotfiles() {
 			local src dst dir
 			src=$(eval echo "$line" | cut -d '=' -f 1)
 			dst=$(eval echo "$line" | cut -d '=' -f 2)
-			if dst != ""; then
+			if $dst == ""; then
+        fail "could not install for $dir"
+      else
 				dir=$(dirname $dst)
 
 				mkdir -p "$dir"
@@ -137,6 +139,12 @@ create_env_file() {
 		echo "export DOTFILES=$DOTFILES" >$HOME/.env.sh
 		success 'created ~/.env.sh'
 	fi
+}
+
+sync_brew() {
+  info "syncing brew..."
+  brew bundle install --file=~/.dotfiles/homebrew/Brewfile
+  success "brew is in sync"
 }
 
 install_dotfiles

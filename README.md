@@ -4,7 +4,7 @@
 
 ```sh
 git clone https://github.com/brenodt/dotfiles.git
-cd dotfiles
+cd .dotfiles
 ./install/bootstrap.sh
 ```
 

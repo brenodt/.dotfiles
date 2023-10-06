@@ -4,4 +4,11 @@ brew_casks:
   - fantastical
   - font-jetbrains-mono-nerd-font
   - mongodb-compass
+  - postman
   - rectangle
+  - slack
+  - spotify
+  - tabby
+  - tg-pro
+  - visual-studio-code
+  - zulu11

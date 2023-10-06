@@ -3,11 +3,10 @@ brew_packages:
   - bash
   - binutils
   - boost
+  - buf
   - openjdk
   - bundletool
   - circleci
-  - openssl@1.1
-  - ruby
   - cocoapods
   - coreutils
   - doctl
@@ -26,6 +25,7 @@ brew_packages:
   - gawk
   - gh
   - git
+  - go
   - gum
   - helm
   - kubectx
@@ -34,6 +34,7 @@ brew_packages:
   - neovim
   - node
   - openjdk@17
+  - openssl@1.1
   - pnpm
   - protobuf
   - python@3.10
@@ -55,6 +56,4 @@ brew_packages:
   - yarn
   - zsh
   - zsh-completions
-  - bufbuild/buf/buf
-  - mongodb/brew/mongodb-database-tools
   - wix/brew/applesimutils
