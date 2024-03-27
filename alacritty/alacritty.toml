@@ -1,0 +1,28 @@
+import = ["/Users/brenodt/.dotfiles/alacritty/themes/gruvbox_dark.toml"]
+
+[font]
+size = 14
+
+[font.normal]
+family = "JetbrainsMono Nerd Font"
+
+[window]
+decorations = "none" 
+
+[window.padding]
+x = 7
+y = 0
+
+[keyboard]
+bindings = [
+  # Delete word
+  { key= "Back",  mods= "Option", chars= "\u0017" },
+  
+  # Move cursor by word
+  { key = "Right", mods = "Alt", chars = "\u001BF" },
+  { key = "Left",  mods = "Alt", chars = "\u001BB" },
+
+  # Move cursor to start / end of line
+  { key = "A", mods = "Control", chars = "\u001BOH", mode = "AppCursor" },
+  { key = "E", mods = "Control", chars = "\u001BOF", mode = "AppCursor" },
+]
