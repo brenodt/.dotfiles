@@ -1,14 +1,16 @@
 ---
 brew_casks:
   - alacritty
-  - fantastical
   - font-jetbrains-mono-nerd-font
   - mongodb-compass
+  - obsidian
+  - pika
+  - podman-desktop
   - postman
-  - rectangle
+  - raycast
   - slack
   - spotify
-  - tabby
   - tg-pro
   - visual-studio-code
   - zulu11
+  - zulu17

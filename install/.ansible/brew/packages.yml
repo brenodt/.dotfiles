@@ -4,56 +4,74 @@ brew_packages:
   - binutils
   - boost
   - buf
+  - harfbuzz
   - openjdk
   - bundletool
   - circleci
   - cocoapods
   - coreutils
   - doctl
-  - python@3.11
   - docutils
+  - libsodium
   - folly
-  - edencommon
-  - exa
-  - fastlane
   - fizz
   - wangle
   - fbthrift
   - fb303
+  - edencommon
+  - wxwidgets
+  - exa
+  - fastlane
   - fd
+  - ffmpeg
   - fzf
   - gawk
   - gh
   - git
   - go
+  - graphviz
   - gum
   - helm
-  - kubectx
-  - luv
   - ncurses
-  - neovim
+  - htop
+  - jq
+  - k9s
+  - kubectx
+  - lazydocker
+  - lazygit
+  - luv
+  - minikube
   - node
+  - mongosh
+  - neovim
+  - ollama
   - openjdk@17
   - openssl@1.1
+  - osv-scanner
   - pnpm
+  - podman
   - protobuf
   - python@3.10
   - tcl-tk
   - python-tk@3.10
+  - python@3.11
   - python-tk@3.11
   - rclone
   - redis
+  - ripgrep
   - ruby@2.7
   - starship
   - stern
+  - syft
+  - tilt
   - tldr
   - tmux
   - tree
   - watch
   - watchman
   - wget
-  - wxwidgets
   - yarn
   - zsh
   - zsh-completions
+  - mongodb/brew/mongodb-database-tools
   - wix/brew/applesimutils
