@@ -74,3 +74,35 @@ function psaux {
   ps aux | head -n1
   ps aux | grep "$arg" | grep -v grep
 }
+
+# Example usage:
+# cv input_video.mp4
+cv() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: compress_video <input_filename>"
+    return 1
+  fi
+
+  input_filename="$1"
+  output_filename="${input_filename%.*}.mp4"
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      -o)
+        shift
+        output_filename="$1"
+        shift
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+
+  ffmpeg -i "$input_filename" -vf "scale=1280:-2:flags=lanczos" -c:v libx264  -preset slow -crf 21 "$output_filename"
+}
+
+# Runs the dotconfig installer so that configs are in sync; assumes .dotfiles repo to be in home
+syncconfigs() {
+  bash $HOME/.dotfiles/install/bootstrap.sh
+}
