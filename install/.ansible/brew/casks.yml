@@ -1,6 +1,7 @@
 ---
 brew_casks:
   - alacritty
+  - clockify
   - font-jetbrains-mono-nerd-font
   - mongodb-compass
   - obsidian

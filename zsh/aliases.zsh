@@ -44,7 +44,8 @@ function brewrapper {
   local original_path="$(pwd)"
   local brew_path="$(whereis brew | cut -d ' ' -f2)"
   
-  if [[ $@ =~ '-(h|-help)' ]]; then
+  if [[ $@ =~ ^install\  ]] || [[ $@ =~ ^uninstall\  ]] || [[ $@ =~ ^tap\  ]]; then
+    echo "Skipping Brewfile and ansible updates for 'brew $@'"
     bash $brew_path $@
     return $?
   fi

@@ -21,14 +21,18 @@ brew_packages:
   - edencommon
   - wxwidgets
   - exa
+  - exercism
   - fastlane
   - fd
+  - pango
   - ffmpeg
   - fzf
   - gawk
+  - gdk-pixbuf
   - gh
   - git
   - go
+  - netpbm
   - graphviz
   - gum
   - helm
@@ -39,6 +43,8 @@ brew_packages:
   - kubectx
   - lazydocker
   - lazygit
+  - libheif
+  - llvm
   - luv
   - minikube
   - node
@@ -49,7 +55,6 @@ brew_packages:
   - openssl@1.1
   - osv-scanner
   - pnpm
-  - podman
   - protobuf
   - python@3.10
   - tcl-tk
