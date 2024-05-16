@@ -1,6 +1,9 @@
-
+*.swp
+# OS generated files #
+######################
 .DS_Store
-Brewfile.lock.json
+.DS_Store?
+._*
+.Trashes
 
-*~
-*.sw*
+Brewfile.lock.json

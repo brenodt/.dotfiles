@@ -1,5 +1,6 @@
 ---
 brew_packages:
+  - ansible
   - bash
   - binutils
   - boost
@@ -8,6 +9,7 @@ brew_packages:
   - openjdk
   - bundletool
   - circleci
+  - ruby
   - cocoapods
   - coreutils
   - doctl
@@ -31,13 +33,16 @@ brew_packages:
   - gdk-pixbuf
   - gh
   - git
+  - gitleaks
   - go
   - netpbm
   - graphviz
+  - grpcurl
   - gum
   - helm
   - ncurses
   - htop
+  - hugo
   - jq
   - k9s
   - kubectx
@@ -61,6 +66,7 @@ brew_packages:
   - python-tk@3.10
   - python@3.11
   - python-tk@3.11
+  - rbenv
   - rclone
   - redis
   - ripgrep

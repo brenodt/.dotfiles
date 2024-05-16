@@ -1,0 +1,37 @@
+# Originally taken from the stow docs, modified to my needs.
+#
+# Source:
+# https://www.gnu.org/software/stow/manual/stow.html#Types-And-Syntax-Of-Ignore-Lists
+
+RCS
+.+,v
+
+CVS
+\.\#.+       # CVS conflict files / emacs lock files
+\.cvsignore
+
+\.svn
+_darcs
+\.hg
+
+\.git
+# \.gitignore
+\.gitmodules
+
+.+~          # emacs backup files
+\#.*\#       # emacs autosave files
+
+^/README.*
+^/LICENSE.*
+^/COPYING
+
+# Custom ignores:
+
+\.idea
+alacritty/themes
+bin
+fontconfig
+homebrew
+install
+zsh
+

@@ -6,6 +6,7 @@ $DOTFILES/nvim/lua/config/options.lua=$HOME/.config/nvim/lua/config/options.lua
 $DOTFILES/nvim/lua/plugins/example.lua=$HOME/.config/nvim/lua/plugins/example.lua
 $DOTFILES/nvim/lua/plugins/dartls.lua=$HOME/.config/nvim/lua/plugins/dartls.lua
 $DOTFILES/nvim/lua/plugins/go.lua=$HOME/.config/nvim/lua/plugins/go.lua
+$DOTFILES/nvim/lua/plugins/neo-tree.lua=$HOME/.config/nvim/lua/plugins/neo-tree.lua
 $DOTFILES/nvim/lua/plugins/treesitter.lua=$HOME/.config/nvim/lua/plugins/treesitter.lua
 $DOTFILES/nvim/.neoconf.json=$HOME/.config/nvim/.neoconf.json
 $DOTFILES/nvim/lazy-lock.json=$HOME/.config/nvim/lazy-lock.json

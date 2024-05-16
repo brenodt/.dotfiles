@@ -1,11 +1,17 @@
-# dotfiles
+# dotfiles - getting started
 
-#### Install
-
-```sh
+```console
 git clone https://github.com/brenodt/dotfiles.git
 cd .dotfiles
-./install/bootstrap.sh
+
+# To see changes before they're made
+stow --simulate .
+
+# To create symlinks on parent directory
+stow .
+
+# To delete
+stow --delete .
 ```
 
 ### Local ZSH Config
@@ -14,18 +20,16 @@ If there's customization you want ZSH to load on startup that is specific to thi
 
 ### How this works
 
-Heavily inspired by [Andrew Burgess' dotfiles](https://github.com/andrew8088/dotfiles) for managing the symlinks using a `links.prop` file in each folder.
+The configuration files are managed via [stow](https://www.gnu.org/software/stow/manual/).
 
 The main addition is the system to auto-install dependencies on a fresh system, which
 uses Ansible.
 
 The structure is:
-- Each program that requires configuration gets a folder
-- normal configurations are added, no need for special file naming (handled by `links.prop`)
-- *REQUIRED* add a `links.prop` file with one entry per file that requires symlinking (e.g. "FILE1=$HOME/.FILE1")
+- Anything that needs to be ignored from symlinking gets added to the `.stow-local-config` file (keep in mind the proper rules for it: [link](https://www.gnu.org/software/stow/manual/stow.html#Types-And-Syntax-Of-Ignore-Lists))
+- stow symlinks to the target directory (default is the parent) by keeping the same structure found in the root. This means the fs should mimic that of the $HOME
 
-Once configuration is done, just run the bootstrap script. The configuration is idempotent, and also gives the options to
-override or backup configuration files that already are at the destination (pretty nice!).
+Once configuration is done, just run `stow .`
 
 ### How updating the homebrew dependencies works
 
@@ -39,3 +43,4 @@ you are aliased to this function, that does:
 This means that maintaining the new dependencies you add/remove from brew is seamless.
 
 Just remember to push the local changes to remote!
+
