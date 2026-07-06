@@ -1,0 +1,20 @@
+{
+  "providers": {
+    "oshell": {
+      "baseUrl": "https://inference.local/v1",
+      "api": "openai-completions",
+      "apiKey": "unused",
+      "models": [
+        {
+          "id": "glm-5.2:cloud",
+          "name": "GLM 5.2 (cloud)",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 128000,
+          "maxTokens": 16384,
+          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
+        }
+      ]
+    }
+  }
+}

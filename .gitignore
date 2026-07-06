@@ -7,3 +7,14 @@
 .Trashes
 
 Brewfile.lock.json
+
+# OpenShell — defence in depth. The gateway's generated PKI, JWT signing keys,
+# and SQLite state live under ~/.config and ~/.local/state (outside this repo),
+# so they should never reach here — but guard against an accidental copy into
+# openshell/ regardless. Also refuse private keys anywhere in the repo.
+*.pem
+*.key
+openshell/**/*.crt
+openshell/**/mtls/**
+openshell/**/*.jwt
+openshell/**/openshell.db

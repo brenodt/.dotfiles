@@ -1,0 +1,13 @@
+# Package-registry egress allowed inside dev sandboxes, bound to the network
+# binary (default /usr/bin/node) so `osh up --install` can run yarn/npm.
+# EVERYTHING ELSE — notably GitHub — stays denied by the default policy, which is
+# what enforces the review gate (code leaves a sandbox only via `osh harvest`).
+#
+# Network rules are binary-scoped, so these hosts are reachable only by the
+# network binary, not by arbitrary processes.
+#
+# Format: host:port[:access[:protocol[:enforcement[:options]]]]
+#   (see `openshell policy update --help`). Add hosts here as installs reveal them.
+registry.yarnpkg.com:443:read-only:rest:enforce
+repo.yarnpkg.com:443:read-only:rest:enforce
+registry.npmjs.org:443:read-only:rest:enforce

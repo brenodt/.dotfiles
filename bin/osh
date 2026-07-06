@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+# osh — drive OpenShell sandboxes for isolated, parallel agent work on a repo.
+#
+# Model backend is chosen in openshell/mode (currently `provider`: ollama.com is
+# registered as an OpenShell openai-provider and sandboxes reach it via
+# https://inference.local — the API token stays on the host, never in a sandbox).
+#
+# Review gate: a repo enters as a git *bundle* (the sandbox clones from it, so it
+# needs no GitHub credentials), the agent commits to branch `agent/<sandbox>`, and
+# `osh harvest` brings that branch back as a bundle you fetch locally. Nothing is
+# ever pushed from the sandbox — you review locally and push yourself.
+set -euo pipefail
+
+: "${DOTFILES:=$HOME/.dotfiles}"
+OSH_DIR="$DOTFILES/openshell"
+# shellcheck source=/dev/null
+source "$OSH_DIR/lib.sh"
+
+usage() {
+  cat <<'EOF'
+osh — isolated agent sandboxes on OpenShell
+
+USAGE
+  osh setup                        configure gateway + ollama provider (idempotent)
+  osh up   [opts] [repo-dir]       create a sandbox, ingest the repo, launch an agent
+  osh harvest <sandbox> [branch]   pull the agent's branch back locally to review (never pushes)
+  osh ls                           list sandboxes
+  osh rm   <sandbox>               delete a sandbox
+
+`up` options
+  -a, --agent <codex|opencode|pi|claude>   default: pi
+  -m, --model <model>                   override the inference model for this run
+  --install                             install deps in the sandbox (opens registry egress)
+  --no-launch                           prepare only, then drop into a shell
+
+Run several `osh up` in parallel — each is its own isolated sandbox.
+EOF
+}
+
+# --- model wiring (provider mode) ---------------------------------------------
+OSH_WORKDIR="${OSH_WORKDIR:-/sandbox/workspace}"  # writable home path; base image has no /workspace
+OSH_NET_BINARY="${OSH_NET_BINARY:-/usr/bin/node}" # binary permitted to reach the allowed registries
+OSH_DEPTH="${OSH_DEPTH:-1}"                        # shallow-clone depth; 1 = fastest, bump for in-sandbox git history
+
+osh_create_sandbox() {
+  local name="$1"
+  osh_ensure_image   # build the custom image (base + pi) if missing; otherwise instant
+  # `-- true` provisions and returns; with no command, create attaches an
+  # interactive TTY and blocks forever. Omitting --no-keep keeps the sandbox.
+  # The default policy denies ALL egress (incl. GitHub) — that IS the review gate.
+  openshell sandbox create --name "$name" --from "$OSH_IMAGE" -- true >/dev/null
+}
+
+# Allow only package-registry egress, bound to the network binary, so installs
+# work while everything else (GitHub!) stays denied. Network rules are
+# binary-scoped; endpoints are versioned in openshell/policy/allow-endpoints.txt.
+osh_apply_policy() {
+  local name="$1" eps=() line
+  [ -r "$OSH_DIR/policy/allow-endpoints.txt" ] || return 0
+  while IFS= read -r line; do
+    case "$line" in ''|\#*) continue;; esac
+    eps+=(--add-endpoint "$line")
+  done < "$OSH_DIR/policy/allow-endpoints.txt"
+  [ "${#eps[@]}" -gt 0 ] || return 0
+  osh_info "allowing package registries (bound to $OSH_NET_BINARY)"
+  openshell policy update "$name" "${eps[@]}" --binary "$OSH_NET_BINARY" --wait >/dev/null
+}
+
+osh_launch_agent() {
+  local name="$1" agent="$2" model="${3:-}"
+  [ -n "$model" ] && { openshell inference update --model "$model" >/dev/null 2>&1 || true; }
+  # NOTE(task 3): exact per-tool endpoint wiring is validated end-to-end once the
+  # Doppler token is in place; codex/opencode are OpenAI-shaped so they match the
+  # ollama(openai) route, claude needs an anthropic-type provider.
+  case "$agent" in
+    codex)
+      # codex mandates the Responses API; ollama.com serves it via the router.
+      local prov='model_providers.oshell={name="oshell",base_url="https://inference.local/v1",env_key="OPENAI_API_KEY",wire_api="responses"}'
+      osh_info "launching codex -> inference.local"
+      openshell sandbox exec -n "$name" --tty --workdir "$OSH_WORKDIR" \
+        --env OPENAI_API_KEY=unused \
+        -- codex -c "$prov" -c model_provider=oshell -m "${model:-glm-5.2:cloud}"
+      ;;
+    opencode)
+      # opencode reads a custom openai-compatible provider from opencode.json;
+      # @ai-sdk/openai-compatible is bundled, so no egress needed.
+      osh_info "configuring opencode -> inference.local"
+      openshell sandbox exec -n "$name" -- mkdir -p /sandbox/.config/opencode >/dev/null 2>&1 || true
+      # upload to the DIR: `sandbox upload` puts the file inside as its basename
+      # (opencode.json) — passing a full file path would create a directory instead.
+      openshell sandbox upload "$name" "$OSH_DIR/configs/opencode.json" /sandbox/.config/opencode/ >/dev/null
+      osh_info "launching opencode"
+      openshell sandbox exec -n "$name" --tty --workdir "$OSH_WORKDIR" -- opencode
+      ;;
+    pi)
+      # pi (baked into the custom image) reads a provider from ~/.pi/agent/models.json.
+      osh_info "configuring pi -> inference.local"
+      openshell sandbox exec -n "$name" -- mkdir -p /sandbox/.pi/agent >/dev/null 2>&1 || true
+      # upload to the DIR so the file lands as models.json (see opencode note).
+      openshell sandbox upload "$name" "$OSH_DIR/configs/pi/models.json" /sandbox/.pi/agent/ >/dev/null
+      osh_info "launching pi"
+      openshell sandbox exec -n "$name" --tty --workdir "$OSH_WORKDIR" -- pi --provider oshell --model glm-5.2:cloud
+      ;;
+    claude)
+      osh_warn "claude speaks the Anthropic API; the ollama/GLM route is OpenAI-only."
+      osh_warn "add an anthropic-type provider to use claude. Dropping into a shell."
+      openshell sandbox connect "$name"
+      ;;
+    *) osh_fail "unknown agent: $agent (codex|opencode|pi|claude)";;
+  esac
+}
+
+# --- commands ------------------------------------------------------------------
+cmd_setup() { exec bash "$OSH_DIR/setup.sh" "$@"; }
+
+cmd_up() {
+  local agent=pi model="" repo="" do_install=0 do_launch=1
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -a|--agent) agent="$2"; shift 2;;
+      -m|--model) model="$2"; shift 2;;
+      --install)    do_install=1; shift;;
+      --no-launch)  do_launch=0; shift;;
+      -*) osh_fail "unknown option: $1";;
+      *)  repo="$1"; shift;;
+    esac
+  done
+  osh_require openshell git
+  repo="$(osh_repo_root "${repo:-$PWD}")"
+  osh_gateway_ok || osh_fail "gateway not reachable — run: osh setup"
+
+  local name tmp; name="$(osh_sandbox_name "$repo" "$agent")"
+  tmp="$(mktemp -d)"; trap 'rm -rf "${tmp:-}" 2>/dev/null || true' RETURN
+
+  # Shallow ingest: only the current snapshot, never the full 300MB history. Two
+  # speedups: (1) create the sandbox concurrently with bundling (independent work);
+  # (2) --no-checkout on the local clone — we only need objects for the bundle, so
+  # skip materializing a working tree that gets thrown away.
+  osh_info "bundling $(basename "$repo") @ $(git -C "$repo" rev-parse --short HEAD) + creating $name (concurrent)"
+  osh_create_sandbox "$name" &
+  local create_pid=$!
+  git clone --quiet --no-checkout --depth "$OSH_DEPTH" "file://$repo" "$tmp/shallow"
+  git -C "$tmp/shallow" bundle create "$tmp/in.bundle" HEAD >/dev/null
+  wait "$create_pid" || osh_fail "sandbox creation failed"
+
+  osh_info "importing repo (clone from bundle — no GitHub access)"
+  openshell sandbox upload "$name" "$tmp/in.bundle" /sandbox/in.bundle >/dev/null
+  openshell sandbox exec -n "$name" -- bash -c "git clone /sandbox/in.bundle $OSH_WORKDIR && git -C $OSH_WORKDIR checkout -b agent/$name" >/dev/null
+
+  mkdir -p "$OSH_STATE"; git -C "$repo" rev-parse HEAD > "$OSH_STATE/$name.base"
+
+  if [ "$do_install" -eq 1 ]; then
+    osh_apply_policy "$name"
+    local inst; inst="$(osh_detect_install "$repo")"
+    [ -n "$inst" ] && { osh_info "installing deps: $inst";
+      openshell sandbox exec -n "$name" --workdir "$OSH_WORKDIR" -- bash -lc "$inst" \
+        || osh_warn "install failed (missing registry host? add it to policy/allow-endpoints.txt)"; }
+  fi
+
+  osh_success "sandbox $name ready (working branch agent/$name)"
+  if [ "$do_launch" -eq 1 ]; then osh_launch_agent "$name" "$agent" "$model"
+  else osh_info "prepared (no launch). attach: openshell sandbox connect $name  |  review: osh harvest $name"; fi
+}
+
+cmd_harvest() {
+  local name="${1:?usage: osh harvest <sandbox> [branch]}"; local branch="${2:-agent/$name}"
+  osh_require openshell git
+  local tmp repo base; tmp="$(mktemp -d)"; trap 'rm -rf "${tmp:-}" 2>/dev/null || true' RETURN
+  repo="$(osh_repo_root "$PWD")"
+  base="$(cat "$OSH_STATE/$name.base" 2>/dev/null || true)"
+
+  # Bundle only the new commits (base..branch) so the transfer stays tiny; the
+  # base already exists in the full local clone, so the fetch applies cleanly.
+  osh_info "bundling $branch out of $name"
+  if [ -n "$base" ]; then
+    openshell sandbox exec -n "$name" --workdir "$OSH_WORKDIR" -- git bundle create /sandbox/out.bundle "$base..$branch" >/dev/null
+  else
+    openshell sandbox exec -n "$name" --workdir "$OSH_WORKDIR" -- git bundle create /sandbox/out.bundle "$branch" >/dev/null
+  fi
+  openshell sandbox download "$name" /sandbox/out.bundle "$tmp/out.bundle" >/dev/null
+
+  osh_info "fetching $branch into $(basename "$repo") (no push)"
+  git -C "$repo" fetch "$tmp/out.bundle" "$branch:$branch"
+  base="${base:-$(git -C "$repo" merge-base HEAD "$branch")}"
+
+  osh_success "imported $branch — review below, then push yourself when approved"
+  echo; git -C "$repo" --no-pager log --oneline "$base..$branch" || true
+  echo; git -C "$repo" --no-pager diff --stat "$base..$branch" || true
+  echo; osh_user "when approved:  git -C $repo push origin $branch"
+}
+
+cmd_ls() { openshell sandbox list "$@"; }
+cmd_rm() { openshell sandbox delete "${1:?usage: osh rm <sandbox>}"; }
+
+main() {
+  local c="${1:-help}"; shift || true
+  case "$c" in
+    setup)   cmd_setup   "$@";;
+    up)      cmd_up      "$@";;
+    harvest) cmd_harvest "$@";;
+    ls)      cmd_ls      "$@";;
+    rm)      cmd_rm      "$@";;
+    help|-h|--help) usage;;
+    *) usage; exit 1;;
+  esac
+}
+main "$@"
