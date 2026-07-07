@@ -1,7 +1,7 @@
 # openshell — isolated agent sandboxes
 
-Version-controlled config + workflow for running coding agents (codex / opencode /
-claude) in **isolated, parallel** [OpenShell](https://github.com/NVIDIA/OpenShell)
+Version-controlled config + workflow for running coding agents (pi / codex / opencode
+/ claude) in **isolated, parallel** [OpenShell](https://github.com/NVIDIA/OpenShell)
 sandboxes, one per agent-run, bootstrapped from a git repo.
 
 ## Layout
@@ -67,13 +67,23 @@ default**, so GitHub is unreachable from inside (verified). `osh up --install` o
 *only* the package-registry hosts in `policy/allow-endpoints.txt`, bound to the network
 binary — GitHub stays denied.
 
+## Skills
+
+Your version-controlled [agent skills](https://github.com/brenodt/skills) are
+installed into every **pi** sandbox by default. `osh up` tars the skill dirs found in
+`$OSH_SKILLS_DIR` (default `~/dev/skills` — each subdir with a `SKILL.md`), extracts
+them to `/sandbox/skills/` inside, and launches `pi --skill <dir>` for each. Opt out
+per run with `--no-skills`. codex/opencode use their own skill mechanisms and ignore this.
+
 ## Usage
 
 ```sh
 osh setup                     # once (and after any config change)
-osh up -a codex ~/dev/foo     # create sandbox, ingest repo (shallow), launch codex
-osh up -a codex --install     # ...also run yarn/npm install (opens registry egress)
-osh up -a codex --no-launch   # (from inside a repo) prepare only, in parallel
+osh up ~/dev/foo              # create sandbox, ingest repo (shallow), launch pi + your skills
+osh up -a codex ~/dev/foo     # ...launch codex instead
+osh up --install              # ...also run yarn/npm install (opens registry egress)
+osh up --no-skills            # ...skip installing your skills for this run
+osh up --no-launch            # (from inside a repo) prepare only, in parallel
 osh harvest <sandbox>         # bring the agent branch back to review (never pushes)
 osh ls ; osh rm <sandbox>     # manage the fleet
 ```

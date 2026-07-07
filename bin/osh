@@ -30,6 +30,7 @@ USAGE
 `up` options
   -a, --agent <codex|opencode|pi|claude>   default: pi
   -m, --model <model>                   override the inference model for this run
+  --no-skills                           skip installing your skills into the sandbox (pi; on by default)
   --install                             install deps in the sandbox (opens registry egress)
   --no-launch                           prepare only, then drop into a shell
 
@@ -37,10 +38,38 @@ Run several `osh up` in parallel — each is its own isolated sandbox.
 EOF
 }
 
+up_usage() {
+  cat <<'EOF'
+osh up — create a sandbox, ingest the current repo, launch an agent
+
+USAGE
+  osh up [options] [repo-dir]              repo-dir defaults to the current git repo
+
+OPTIONS
+  -a, --agent <codex|opencode|pi|claude>   agent to launch (default: pi)
+  -m, --model <model>                      override the inference model for this run
+      --no-skills                          skip installing your skills into the sandbox (pi; installed by default)
+      --install                            install repo deps in the sandbox (opens registry egress)
+      --no-launch                          prepare only, then leave the sandbox idle to attach/harvest
+  -h, --help                               show this help
+
+ENV
+  OSH_DEPTH=<n>        shallow-clone depth for the ingest bundle (default: 1)
+  OSH_MODEL=<m>        default inference model when -m is omitted
+  OSH_SKILLS_DIR=<d>   version-controlled skills to install (default: ~/dev/skills)
+
+Each `osh up` is its own isolated sandbox — run several in parallel, review each
+with `osh harvest`. Nothing is ever pushed from a sandbox.
+EOF
+}
+
 # --- model wiring (provider mode) ---------------------------------------------
 OSH_WORKDIR="${OSH_WORKDIR:-/sandbox/workspace}"  # writable home path; base image has no /workspace
 OSH_NET_BINARY="${OSH_NET_BINARY:-/usr/bin/node}" # binary permitted to reach the allowed registries
 OSH_DEPTH="${OSH_DEPTH:-1}"                        # shallow-clone depth; 1 = fastest, bump for in-sandbox git history
+OSH_SKILLS_DIR="${OSH_SKILLS_DIR:-$HOME/dev/skills}" # version-controlled skills to install (github.com/brenodt/skills)
+OSH_SKILL_ROOT="${OSH_SKILL_ROOT:-/sandbox/skills}"  # where those skills land inside the sandbox
+OSH_SKILL_ARGS=()                                    # pi `--skill <path>` flags, filled by osh_install_skills
 
 osh_create_sandbox() {
   local name="$1"
@@ -66,8 +95,28 @@ osh_apply_policy() {
   openshell policy update "$name" "${eps[@]}" --binary "$OSH_NET_BINARY" --wait >/dev/null
 }
 
+# Install the version-controlled skills into the sandbox and record pi `--skill`
+# flags in OSH_SKILL_ARGS. Sources come from $OSH_SKILLS_DIR (each subdir with a
+# SKILL.md is one skill); packaged as a tar and extracted inside so the transfer
+# is deterministic (same idea as the repo bundle). No-op if the dir is empty/absent.
+osh_install_skills() {
+  local name="$1" dir="$OSH_SKILLS_DIR" names=() s
+  OSH_SKILL_ARGS=()
+  [ -d "$dir" ] || { osh_warn "skills dir not found: $dir — skipping (set OSH_SKILLS_DIR)"; return 0; }
+  for s in "$dir"/*/; do [ -f "${s}SKILL.md" ] && names+=("$(basename "$s")"); done
+  [ "${#names[@]}" -gt 0 ] || { osh_info "no skills in $dir — skipping"; return 0; }
+  osh_info "installing skills: ${names[*]}"
+  local tmp; tmp="$(mktemp -d)"
+  tar czf "$tmp/skills.tgz" -C "$dir" "${names[@]}"
+  openshell sandbox upload "$name" "$tmp/skills.tgz" /sandbox/ >/dev/null
+  openshell sandbox exec -n "$name" -- bash -c \
+    "mkdir -p $OSH_SKILL_ROOT && tar xzf /sandbox/skills.tgz -C $OSH_SKILL_ROOT && rm -f /sandbox/skills.tgz" >/dev/null
+  rm -rf "$tmp"
+  for s in "${names[@]}"; do OSH_SKILL_ARGS+=(--skill "$OSH_SKILL_ROOT/$s"); done
+}
+
 osh_launch_agent() {
-  local name="$1" agent="$2" model="${3:-}"
+  local name="$1" agent="$2" model="${3:-}" skills="${4:-1}"
   [ -n "$model" ] && { openshell inference update --model "$model" >/dev/null 2>&1 || true; }
   # NOTE(task 3): exact per-tool endpoint wiring is validated end-to-end once the
   # Doppler token is in place; codex/opencode are OpenAI-shaped so they match the
@@ -98,8 +147,11 @@ osh_launch_agent() {
       openshell sandbox exec -n "$name" -- mkdir -p /sandbox/.pi/agent >/dev/null 2>&1 || true
       # upload to the DIR so the file lands as models.json (see opencode note).
       openshell sandbox upload "$name" "$OSH_DIR/configs/pi/models.json" /sandbox/.pi/agent/ >/dev/null
+      [ "$skills" -eq 1 ] && osh_install_skills "$name"
       osh_info "launching pi"
-      openshell sandbox exec -n "$name" --tty --workdir "$OSH_WORKDIR" -- pi --provider oshell --model glm-5.2:cloud
+      # pi loads each skill dir via --skill (empty-array-safe under set -u).
+      openshell sandbox exec -n "$name" --tty --workdir "$OSH_WORKDIR" -- \
+        pi --provider oshell --model glm-5.2:cloud ${OSH_SKILL_ARGS[@]+"${OSH_SKILL_ARGS[@]}"}
       ;;
     claude)
       osh_warn "claude speaks the Anthropic API; the ollama/GLM route is OpenAI-only."
@@ -114,13 +166,16 @@ osh_launch_agent() {
 cmd_setup() { exec bash "$OSH_DIR/setup.sh" "$@"; }
 
 cmd_up() {
-  local agent=pi model="" repo="" do_install=0 do_launch=1
+  local agent=pi model="" repo="" do_install=0 do_launch=1 do_skills=1
   while [ $# -gt 0 ]; do
     case "$1" in
       -a|--agent) agent="$2"; shift 2;;
       -m|--model) model="$2"; shift 2;;
+      --skills)     do_skills=1; shift;;
+      --no-skills)  do_skills=0; shift;;
       --install)    do_install=1; shift;;
       --no-launch)  do_launch=0; shift;;
+      -h|--help)    up_usage; return 0;;
       -*) osh_fail "unknown option: $1";;
       *)  repo="$1"; shift;;
     esac
@@ -158,7 +213,7 @@ cmd_up() {
   fi
 
   osh_success "sandbox $name ready (working branch agent/$name)"
-  if [ "$do_launch" -eq 1 ]; then osh_launch_agent "$name" "$agent" "$model"
+  if [ "$do_launch" -eq 1 ]; then osh_launch_agent "$name" "$agent" "$model" "$do_skills"
   else osh_info "prepared (no launch). attach: openshell sandbox connect $name  |  review: osh harvest $name"; fi
 }
 
